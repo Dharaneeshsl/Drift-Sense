@@ -25,7 +25,7 @@ def estimate_pitch(image: np.ndarray) -> tuple[float, float]:
         corr = np.correlate(values, values, mode="full")[values.size - 1:]
         corr[:2] = -np.inf
         max_lag = min(values.size - 1, max(3, values.size // 2))
-        return float(np.argmax(corr[:max_lag]) or 0)
+        return float(np.argmax(corr[:max_lag]))
     return one(gx), one(gy)
 
 

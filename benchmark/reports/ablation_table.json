@@ -1,0 +1,110 @@
+[
+  {
+    "profile": "intensity_only",
+    "id": {
+      "strict": 18,
+      "cases": 20,
+      "mean_error": 0.19249693924884068
+    },
+    "ood": {
+      "strict": 8,
+      "cases": 10,
+      "mean_error": 0.2524182665654787
+    },
+    "hard_periodic": {
+      "strict": 2,
+      "cases": 5,
+      "mean_error": 182.9681511485274
+    }
+  },
+  {
+    "profile": "+gradient",
+    "id": {
+      "strict": 19,
+      "cases": 20,
+      "mean_error": 0.18819387033375604
+    },
+    "ood": {
+      "strict": 8,
+      "cases": 10,
+      "mean_error": 0.24861204223991487
+    },
+    "hard_periodic": {
+      "strict": 2,
+      "cases": 5,
+      "mean_error": 182.96638030310405
+    }
+  },
+  {
+    "profile": "+high_pass",
+    "id": {
+      "strict": 18,
+      "cases": 20,
+      "mean_error": 0.1661478863219005
+    },
+    "ood": {
+      "strict": 8,
+      "cases": 10,
+      "mean_error": 0.2316447016726611
+    },
+    "hard_periodic": {
+      "strict": 2,
+      "cases": 5,
+      "mean_error": 182.96324248876505
+    }
+  },
+  {
+    "profile": "+squared_error_agreement",
+    "id": {
+      "strict": 18,
+      "cases": 20,
+      "mean_error": 0.1703488507177271
+    },
+    "ood": {
+      "strict": 8,
+      "cases": 10,
+      "mean_error": 0.23484810232428402
+    },
+    "hard_periodic": {
+      "strict": 1,
+      "cases": 5,
+      "mean_error": 193.09130888600455
+    }
+  },
+  {
+    "profile": "+fourier_agreement",
+    "id": {
+      "strict": 18,
+      "cases": 20,
+      "mean_error": 0.16935705083113084
+    },
+    "ood": {
+      "strict": 8,
+      "cases": 10,
+      "mean_error": 0.2341181574248754
+    },
+    "hard_periodic": {
+      "strict": 1,
+      "cases": 5,
+      "mean_error": 193.09095235783536
+    }
+  },
+  {
+    "profile": "driftsense_fm_full",
+    "id": {
+      "strict": 18,
+      "cases": 20,
+      "mean_error": 0.16935705083113084
+    },
+    "ood": {
+      "strict": 8,
+      "cases": 10,
+      "mean_error": 0.2341181574248754
+    },
+    "hard_periodic": {
+      "strict": 1,
+      "cases": 5,
+      "mean_error": 193.09095235783536
+    }
+  }
+]

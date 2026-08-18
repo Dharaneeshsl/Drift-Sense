@@ -26,7 +26,8 @@ def evaluate(split_dir: Path, profile: str) -> tuple[int, int, float]:
     for row in csv.DictReader((split_dir / "pairs.csv").open()):
         ref = load_array(split_dir / row["reference"], "reference")
         search = load_array(split_dir / row["search"], "search")
-        pred, _ = predict(ref, search, profile=profile, top_k=16)
+        canonical_profile = "full" if profile == "driftsense_fm_full" else profile
+        pred, _ = predict(ref, search, profile=canonical_profile, top_k=16)
         tx, ty = truth[row["id"]]
         dx, dy = pred["x"] - tx, pred["y"] - ty
         strict += int(abs(dx) <= 0.5 and abs(dy) <= 0.5)
@@ -52,6 +53,10 @@ def main() -> None:
         lines.append(f"| {profile} | {i[0]}/{i[1]} | {o[0]}/{o[1]} | {h[0]}/{h[1]} | {i[2]:.3f} px | {o[2]:.3f} px |")
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    json_rows = []
+    for profile, values in rows:
+        json_rows.append({"profile": profile, "id": {"strict": values["ID"][0], "cases": values["ID"][1], "mean_error": values["ID"][2]}, "ood": {"strict": values["OOD"][0], "cases": values["OOD"][1], "mean_error": values["OOD"][2]}, "hard_periodic": {"strict": values["Hard periodic"][0], "cases": values["Hard periodic"][1], "mean_error": values["Hard periodic"][2]}})
+    args.report.with_suffix(".json").write_text(json.dumps(json_rows, indent=2), encoding="utf-8")
     print("\n".join(lines))
 
 

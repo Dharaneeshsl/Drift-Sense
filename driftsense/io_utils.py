@@ -40,21 +40,49 @@ def discover_pairs(input_dir: str | Path, official: bool = True) -> list[dict[st
     pairs: list[dict[str, str]] = []
     if pairs_csv.exists():
         with pairs_csv.open(newline="", encoding="utf-8") as f:
-            rows = list(csv.DictReader(f))
-        if not rows or not {"id", "reference", "search"}.issubset(rows[0]):
-            raise ValueError("pairs.csv must contain columns id,reference,search")
-        for row in rows:
-            pairs.append({"id": row["id"], "reference": str((root / row["reference"]).resolve()), "search": str((root / row["search"]).resolve())})
+            reader = csv.DictReader(f)
+            fieldnames = set(reader.fieldnames or [])
+            required = {"id", "reference", "search"}
+            if not required.issubset(fieldnames):
+                raise ValueError("pairs.csv must contain columns id,reference,search")
+            rows = list(reader)
+        if not rows:
+            raise ValueError("pairs.csv contains no input pairs")
+        seen: set[str] = set()
+        for index, row in enumerate(rows, start=2):
+            ident = (row.get("id") or "").strip()
+            reference_value = (row.get("reference") or "").strip()
+            search_value = (row.get("search") or "").strip()
+            if not ident or not reference_value or not search_value:
+                raise ValueError(f"pairs.csv row {index} has an empty id, reference, or search field")
+            if ident in seen:
+                raise ValueError(f"pairs.csv contains duplicate id: {ident}")
+            seen.add(ident)
+            reference_path = Path(reference_value)
+            search_path = Path(search_value)
+            if not reference_path.is_absolute():
+                reference_path = root / reference_path
+            if not search_path.is_absolute():
+                search_path = root / search_path
+            if not reference_path.is_file():
+                raise FileNotFoundError(f"pairs.csv row {index} reference file does not exist: {reference_path}")
+            if not search_path.is_file():
+                raise FileNotFoundError(f"pairs.csv row {index} search file does not exist: {search_path}")
+            pairs.append({"id": ident, "reference": str(reference_path.resolve()), "search": str(search_path.resolve())})
         return pairs
     ref = root / "reference.npy"
     search = root / "search.npy"
     if ref.exists() and search.exists():
-        return [{"id": "pair", "reference": str(ref), "search": str(search)}]
+        return [{"id": "pair", "reference": str(ref.resolve()), "search": str(search.resolve())}]
+    if ref.exists() != search.exists():
+        raise ValueError("Input directory must contain both reference.npy and search.npy when using the single-pair form")
     for ref in sorted(root.glob("*_reference.npy")):
         ident = ref.name[: -len("_reference.npy")]
         candidate = root / f"{ident}_search.npy"
         if candidate.exists():
             pairs.append({"id": ident, "reference": str(ref), "search": str(candidate)})
+    if len({row["id"] for row in pairs}) != len(pairs):
+        raise ValueError("Input pair IDs must be unique")
     if not pairs:
         raise ValueError("No input pair found. Provide pairs.csv, reference.npy+search.npy, or <id>_reference.npy/<id>_search.npy pairs.")
     return pairs

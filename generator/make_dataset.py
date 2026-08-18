@@ -97,6 +97,7 @@ def main() -> None:
         parser.error("choose only one of --fast or --full")
     full = bool(args.full)
     if not args.fast and not args.full:
+        args.fast = True
         print("No mode selected; using --fast compact fixtures. Pass --full for continuous 10000x10000 latent scenes.")
     args.output.mkdir(parents=True, exist_ok=True)
     make_split(args.output, "id_visible_anchor", 20, 1000, True, False, False, full)

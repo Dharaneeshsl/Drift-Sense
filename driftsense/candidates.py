@@ -36,8 +36,17 @@ def _local_maxima(score: np.ndarray, count: int, min_distance: int) -> list[tupl
 
 
 def generate_candidates(template: np.ndarray, search: np.ndarray, top_k: int = 16, min_distance: int = 12, profile: str = "full") -> dict[str, Any]:
+    valid_profiles = {"full", "driftsense_fm_full", "intensity_only", "+gradient", "+high_pass", "+squared_error_agreement", "+fourier_agreement"}
+    if int(top_k) < 1:
+        raise ValueError(f"top_k must be at least 1; received {top_k}")
+    if int(min_distance) < 0:
+        raise ValueError(f"min_distance must be non-negative; received {min_distance}")
+    if profile not in valid_profiles:
+        raise ValueError(f"unknown scoring profile {profile!r}; expected one of {sorted(valid_profiles)}")
     t = normalize_image(template)
     s = normalize_image(search)
+    if not np.isfinite(t).all() or not np.isfinite(s).all():
+        raise ValueError("template and search must contain only finite values")
     if t.shape[0] > s.shape[0] or t.shape[1] > s.shape[1]:
         raise ValueError("calibrated template must not exceed search dimensions")
     gradient_t = cv2.magnitude(cv2.Sobel(t, cv2.CV_32F, 1, 0, ksize=3), cv2.Sobel(t, cv2.CV_32F, 0, 1, ksize=3))
@@ -57,7 +66,9 @@ def generate_candidates(template: np.ndarray, search: np.ndarray, top_k: int = 1
     elif profile == "+squared_error_agreement":
         coarse = 0.40 * intensity + 0.20 * gradient + 0.15 * high_pass + 0.25 * squared
     else:
-        coarse = 0.35 * intensity + 0.20 * squared + 0.20 * gradient + 0.15 * high_pass
+        # The documented coarse weights sum to 0.90; normalize the fused map so
+        # its scale is comparable to the profile-specific maps without changing ranking.
+        coarse = (0.35 * intensity + 0.20 * squared + 0.20 * gradient + 0.15 * high_pass) / 0.90
     points = _local_maxima(coarse, top_k, min_distance)
     return {
         "template": t, "search": s, "intensity_map": intensity, "squared_map": squared,

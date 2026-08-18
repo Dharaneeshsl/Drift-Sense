@@ -16,12 +16,15 @@ ROOT = Path(__file__).resolve().parents[1]
 SPLITS = [("ID visible-anchor", "id_visible_anchor"), ("OOD visible-anchor", "ood_visible_anchor"), ("Hard ambiguous periodic", "hard_ambiguous")]
 
 
-def run_split(data_root: Path, split_dir: Path) -> dict:
+def run_split(split_dir: Path) -> dict:
     with tempfile.TemporaryDirectory(prefix="driftsense_bench_") as tmp:
         output = Path(tmp) / "output"
         started = time.perf_counter()
-        subprocess.run([sys.executable, str(ROOT / "run.py"), str(split_dir), str(output)], check=True, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        completed = subprocess.run([sys.executable, str(ROOT / "run.py"), str(split_dir), str(output)], check=False, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         elapsed = time.perf_counter() - started
+        if completed.returncode != 0:
+            details = (completed.stderr or completed.stdout or "no subprocess output").strip()
+            raise RuntimeError(f"benchmark CLI failed for {split_dir.name} with exit code {completed.returncode}: {details}")
         truth = {r["id"]: (float(r["x_true"]), float(r["y_true"])) for r in csv.DictReader((split_dir / "ground_truth.csv").open())}
         rows = list(csv.DictReader((output / "predictions.csv").open()))
         errors = []
@@ -45,7 +48,7 @@ def main() -> None:
     args = parser.parse_args()
     results = {}
     for label, dirname in SPLITS:
-        results[dirname] = run_split(args.data, args.data / dirname)
+        results[dirname] = run_split(args.data / dirname)
     args.report.with_suffix(".json").write_text(json.dumps(results, indent=2), encoding="utf-8")
     lines = ["# Local diagnostic benchmark", "", "These are measured local synthetic results, not official challenge results.", "", "| Split | Cases | Strict ±0.5px | Relaxed ≤1px | Mean Euclidean error | Mean runtime/pair |", "|---|---:|---:|---:|---:|---:|"]
     for label, dirname in SPLITS:
