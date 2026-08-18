@@ -59,6 +59,13 @@ class IOAndRobustnessTests(unittest.TestCase):
             self.assertTrue((out / "predictions.csv").is_file())
             self.assertTrue((out / "a.json").is_file())
 
+    def test_periodic_tie_is_marked_non_identifiable(self):
+        selected = {"center_x": 10.0, "center_y": 20.0, "final_score": 0.8}
+        decoy = {"center_x": 100.0, "center_y": 120.0, "final_score": 0.79}
+        diag = build_diagnostics(selected, [selected, decoy], 0.01, True, (8.0, 9.0))
+        self.assertEqual(diag["label"], "non_identifiable_periodic")
+        self.assertTrue(diag["identifiability_warning"])
+
     def test_optional_reranker_fails_clearly_when_absent(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertFalse(available(Path(tmp) / "missing.pt"))

@@ -18,6 +18,7 @@ python -m generator.make_dataset --fast
 # python -m generator.make_dataset --full
 python benchmark/run_benchmark.py
 python benchmark/ablation.py
+python submission_smoke.py
 python run.py <input-dir> <output-dir>
 ```
 
@@ -27,7 +28,7 @@ The runtime path needs only NumPy and OpenCV. It makes no network requests, down
 
 The CLI accepts a directory containing `pairs.csv` with columns `id,reference,search`, a single `reference.npy` and `search.npy`, or multiple `<id>_reference.npy` and `<id>_search.npy` pairs. Official mode validates finite numeric grayscale arrays of shape `1000×1000`; use `--dev` only for small local unit fixtures.
 
-The output directory contains `predictions.csv` with `id,x,y,confidence` and one JSON diagnostics file per input pair. Coordinates are target-center coordinates in search-image pixels. Diagnostics include the score margin, top candidates, dominant pitch, all component scores, confidence, and the `high_confidence` or `periodic_ambiguity` label. Malformed CSV rows, duplicate IDs, missing files, invalid parameters, non-finite arrays, and shape violations fail with explicit errors.
+The output directory contains `predictions.csv` with `id,x,y,confidence` and one JSON diagnostics file per input pair. Coordinates are target-center coordinates in search-image pixels. Diagnostics include the score margin, top candidates, dominant pitch, all component scores, confidence, and the `high_confidence`, `periodic_ambiguity`, or `non_identifiable_periodic` label. The latter explicitly marks spatially separated near-tied candidates where image evidence cannot uniquely identify one location. Malformed CSV rows, duplicate IDs, missing files, invalid parameters, non-finite arrays, shape violations, out-of-bounds predictions, and invalid confidence values fail with explicit errors.
 
 ## Architecture
 
@@ -53,9 +54,9 @@ The currently measured local results are:
 
 | Split | Cases | Strict ±0.5px | Relaxed ≤1px | Mean Euclidean error | Mean runtime/pair |
 |---|---:|---:|---:|---:|---:|
-| ID visible-anchor | 20 | 18/20 | 20/20 | 0.169 px | 0.240 s |
-| OOD visible-anchor | 10 | 8/10 | 9/10 | 0.234 px | 0.258 s |
-| Hard ambiguous periodic | 5 | 1/5 | 1/5 | 193.091 px | 0.294 s |
+| ID visible-anchor | 20 | 18/20 | 20/20 | 0.169 px | 0.247 s |
+| OOD visible-anchor | 10 | 8/10 | 9/10 | 0.234 px | 0.269 s |
+| Hard ambiguous periodic | 5 | 1/5 | 1/5 | 193.091 px | 0.309 s |
 
 These are measured on the included compact synthetic fixtures, not official challenge data. The visible-anchor splits contain a discriminative asymmetric feature by design. The hard split removes that information and is an honesty artifact: a periodic scene without a distinguishing cue is expected to remain ambiguous. Therefore, local visible-anchor success must not be overclaimed as proof of periodicity-aware superiority or official challenge performance.
 
@@ -90,10 +91,11 @@ All diagnostic cases store seed, pitch, mode, anchor status, and ground-truth me
 | Official input/output contract | Complete |
 | Deterministic seeded generator | Complete |
 | Robust malformed-input handling | Complete |
-| Unit and end-to-end tests | Complete; 19 tests |
+| Unit and end-to-end tests | Complete; 20 tests |
 | Benchmark and ablation reports | Complete; locally measured |
 | License and runtime pin | Complete |
 | Continuous-integration workflow | Complete |
+| Clean submission smoke test | Complete; `python submission_smoke.py` |
 | Hidden official-dataset validation | Not available in this environment |
 
 ## References

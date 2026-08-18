@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 import time
 from pathlib import Path
 
@@ -64,8 +65,15 @@ def main() -> int:
         reference = load_array(pair["reference"], "reference", official=not args.dev)
         search = load_array(pair["search"], "search", official=not args.dev)
         prediction, diag = predict(reference, search, top_k=args.top_k, min_distance=args.min_distance, score_margin=args.score_margin, official=not args.dev)
+        x, y, confidence = float(prediction["x"]), float(prediction["y"]), float(prediction["confidence"])
+        if not all(math.isfinite(value) for value in (x, y, confidence)):
+            raise RuntimeError(f"non-finite prediction for pair {pair['id']}")
+        if not (0.0 <= x <= float(search.shape[1]) and 0.0 <= y <= float(search.shape[0])):
+            raise RuntimeError(f"prediction for pair {pair['id']} is outside search bounds: ({x}, {y})")
+        if not 0.0 <= confidence <= 1.0:
+            raise RuntimeError(f"confidence for pair {pair['id']} is outside [0, 1]: {confidence}")
         prediction["id"] = pair["id"]
-        predictions.append({"id": pair["id"], "x": prediction["x"], "y": prediction["y"], "confidence": prediction["confidence"]})
+        predictions.append({"id": pair["id"], "x": x, "y": y, "confidence": confidence})
         diagnostics[pair["id"]] = {**diag, "id": pair["id"], "runtime_seconds": time.perf_counter() - pair_started}
     write_outputs(args.output_dir, predictions, diagnostics)
     return 0
