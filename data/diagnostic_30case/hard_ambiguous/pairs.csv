@@ -1,0 +1,6 @@
+id,reference,search
+hard_ambiguous_00,hard_ambiguous_00_reference.npy,hard_ambiguous_00_search.npy
+hard_ambiguous_01,hard_ambiguous_01_reference.npy,hard_ambiguous_01_search.npy
+hard_ambiguous_02,hard_ambiguous_02_reference.npy,hard_ambiguous_02_search.npy
+hard_ambiguous_03,hard_ambiguous_03_reference.npy,hard_ambiguous_03_search.npy
+hard_ambiguous_04,hard_ambiguous_04_reference.npy,hard_ambiguous_04_search.npy

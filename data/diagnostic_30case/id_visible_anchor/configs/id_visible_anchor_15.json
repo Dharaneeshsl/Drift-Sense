@@ -1,0 +1,11 @@
+{
+  "id": "id_visible_anchor_15",
+  "x_true": 417.0,
+  "y_true": 593.0,
+  "seed": 1015,
+  "pitch_x": 56,
+  "pitch_y": 47,
+  "mode": "fast_fixture",
+  "anchor": true,
+  "hard": false
+}

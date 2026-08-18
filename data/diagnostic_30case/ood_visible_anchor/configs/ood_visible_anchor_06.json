@@ -1,0 +1,11 @@
+{
+  "id": "ood_visible_anchor_06",
+  "x_true": 232.0,
+  "y_true": 369.0,
+  "seed": 2006,
+  "pitch_x": 74,
+  "pitch_y": 91,
+  "mode": "fast_fixture",
+  "anchor": true,
+  "hard": false
+}

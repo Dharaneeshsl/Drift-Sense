@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Generated local arrays are large; retain configs and ground truth in Git.
+data/*
+!data/.gitkeep
+!data/diagnostic_30case/
+!data/diagnostic_30case/*/
+!data/diagnostic_30case/*/configs/
+!data/diagnostic_30case/*/configs/*.json
+!data/diagnostic_30case/*/ground_truth.csv
+!data/diagnostic_30case/*/pairs.csv
+data/diagnostic_30case/*/*.npy
+
+# Local source attachment and temporary debugging artifacts.
+solution_proposal.txt
+debug_cases.py

@@ -1,0 +1,11 @@
+{
+  "id": "hard_ambiguous_02",
+  "x_true": 651.0,
+  "y_true": 496.0,
+  "seed": 3002,
+  "pitch_x": 53,
+  "pitch_y": 41,
+  "mode": "fast_fixture",
+  "anchor": false,
+  "hard": true
+}
